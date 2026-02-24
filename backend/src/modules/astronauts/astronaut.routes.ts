@@ -23,10 +23,26 @@ export async function astronautRoutes(app: FastifyInstance): Promise<void> {
   });
 
   app.put("/astronauts/:id", async (request, reply) => {
+    const id = astronautId.parse((request.params as { id: string }).id);
+    const body = updateAstronautBody.parse(request.body);
+    const updated = await updateAstronaut(id, body);
+
+    if (!updated) {
+      return reply.status(404).send({ error: "Astronaut not found" });
+    }
+
+    return reply.status(200).send(formatRow(updated));
   });
 
   app.delete("/astronauts/:id", async (request, reply) => {
-    
+    const id = astronautId.parse((request.params as { id: string }).id);
+    const deleted = await softDeleteAstronaut(id);
+
+    if (!deleted) {
+      return reply.status(404).send({ error: "Astronaut not found" });
+    }
+
+    return reply.status(200).send(formatRow(deleted));
   });
 
   app.setErrorHandler((error, _request, reply) => {

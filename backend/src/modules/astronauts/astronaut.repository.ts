@@ -53,3 +53,46 @@ export async function createAstronaut(data: CreateAstronautData): Promise<Astron
 
   return rows[0];
 }
+
+export async function softDeleteAstronaut(id: number): Promise<AstronautRow | null> {
+  const { rows } = await pool.query<AstronautRow>(
+    `UPDATE astronauts SET deleted_at = NOW() WHERE id = $1 AND deleted_at IS NULL RETURNING *`,
+    [id]
+  );
+
+  return rows[0] ?? null;
+}
+
+export async function updateAstronaut(id: number, data: UpdateAstronautData): Promise<AstronautRow | null> {
+  const fields = [];
+  const values: unknown[] = [];
+
+  if (data.name) {
+    values.push(data.name);
+    fields.push(`name = $${values.length}`);
+  }
+  if (data.role) {
+    values.push(data.role);
+    fields.push(`role = $${values.length}`);
+  }
+  if (data.nationality) {
+    values.push(data.nationality);
+    fields.push(`nationality = $${values.length}`);
+  }
+  if (data.status) {
+    values.push(data.status);
+    fields.push(`status = $${values.length}`);
+  }
+
+  values.push(new Date());
+  fields.push(`updated_at = $${values.length}`);
+
+  values.push(id);
+
+  const { rows } = await pool.query<AstronautRow>(
+    `UPDATE astronauts SET ${fields.join(", ")} WHERE id = $${values.length} AND deleted_at IS NULL RETURNING *`,
+    values
+  );
+
+  return rows[0] ?? null;
+}
