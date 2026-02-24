@@ -9,7 +9,7 @@ function formatMissionRow(row: MissionRow) {
     id: String(row.id),
     nome: row.nome,
     astronautId: row.astronaut_id,
-    supplyId: String(row.supply_id),
+    supplyId: row.supply_id, 
     created_at: row.created_at.toISOString(),
     updated_at: row.updated_at.toISOString()
   };
